@@ -1,0 +1,37 @@
+## Laxical Analysis
+- strings -> tokens
+- tokens
+	- types
+	- value
+- Lexer
+
+```
+int main()
+{
+	int x = 50;
+}
+
+# tokens
+<keyword, "int">
+<identifier, "main">
+<operator, "(">
+...
+```
+
+Token types in our Compiler
+- TOKEN_TYPE_IDENTIFIER
+- TOKEN_TYPE_KEYWORD
+- TOKEN_TYPE_OPERATOR
+- TOKEN_TYPE_SYMBOL
+- TOKEN_TYPE_NUMBER
+- TOKEN_TYPE_STRING
+- TOKEN_TYPE_COMMENT
+- TOKEN_TYPE_NEWLINE
+
+'(' and '[' are operators while ')' and ']' are symbol.
+
+### Creating a number token
+- Need to revisit this section once fixed gdb bug
+
+
+
