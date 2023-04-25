@@ -1,4 +1,1 @@
-int main()
-{
-    return 0;
-}
+"hello" 123 34 "test"
