@@ -334,9 +334,12 @@ static struct token *token_make_identifier_or_keyword()
     buffer_write(buffer, 0x00);
 
     // check if this is a keyword
+    if (is_keyword(buffer_ptr(buffer)))
+    {
+        return token_create(&(struct token){.type = TOKEN_TYPE_KEYWORD, .sval=buffer_ptr(buffer)});
+    }
 
-    struct token *token = token_create(&(struct token){.type = TOKEN_TYPE_IDENTIFIER, .sval=buffer_ptr(buffer)});
-    return token;
+    return token_create(&(struct token){.type = TOKEN_TYPE_IDENTIFIER, .sval=buffer_ptr(buffer)});
 }
 
 struct token* read_special_token()
