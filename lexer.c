@@ -98,7 +98,7 @@ struct token *token_make_number()
 static struct token *token_make_string(char start_delim, char end_delim)
 {
     struct buffer *buf = buffer_create();
-    assert (nextc() == start_delim);  // pop out the quote, not save into buffer
+    assert(nextc() == start_delim); // pop out the quote, not save into buffer
     char c = nextc();
     for (; c != end_delim && c != EOF; c = nextc())
     {
@@ -115,6 +115,159 @@ static struct token *token_make_string(char start_delim, char end_delim)
     return token_create(&(struct token){.type = TOKEN_TYPE_STRING, .sval = buffer_ptr(buf)});
 }
 
+static bool op_treated_as_one(char op)
+{
+    // ** and *** are handled differently
+    return op == '(' || op == '[' || op == ',' || op == '.' || op == '*' || op == '?';
+}
+
+static bool is_single_operator(char op)
+{
+    return op == '+' ||
+           op == '-' ||
+           op == '/' ||
+           op == '*' ||
+           op == '=' ||
+           op == '>' ||
+           op == '<' ||
+           op == '|' ||
+           op == '&' ||
+           op == '^' ||
+           op == '%' ||
+           op == '~' ||
+           op == '!' ||
+           op == '(' ||
+           op == '[' ||
+           op == ',' ||
+           op == '.' ||
+           op == '?';
+}
+
+bool op_valid(const char *op) // string
+{
+    // call strcmp every time is not elegant
+    return S_EQ(op, "+") ||
+           S_EQ(op, "-") ||
+           S_EQ(op, "*") ||
+           S_EQ(op, "/") ||
+           S_EQ(op, "!") ||
+           S_EQ(op, "^") ||
+           S_EQ(op, "+=") ||
+           S_EQ(op, "-=") ||
+           S_EQ(op, "*=") ||
+           S_EQ(op, "/=") ||
+           S_EQ(op, ">>") ||
+           S_EQ(op, "<<") ||
+           S_EQ(op, ">=") ||
+           S_EQ(op, "<=") ||
+           S_EQ(op, ">") ||
+           S_EQ(op, "<") ||
+           S_EQ(op, "||") ||
+           S_EQ(op, "&&") ||
+           S_EQ(op, "|") ||
+           S_EQ(op, "&") ||
+           S_EQ(op, "++") ||
+           S_EQ(op, "--") ||
+           S_EQ(op, "=") ||
+           S_EQ(op, "!=") ||
+           S_EQ(op, "==") ||
+           S_EQ(op, "->") ||
+           S_EQ(op, "(") ||
+           S_EQ(op, "[") ||
+           S_EQ(op, ".") ||
+           S_EQ(op, "...") ||
+           S_EQ(op, "~") ||
+           S_EQ(op, "?") ||
+           S_EQ(op, "%");
+}
+
+void read_op_flush_back_keep_first(struct buffer *buffer)
+{
+    const char *data = buffer_ptr(buffer);
+    int len = buffer->len;
+    for (int i = len - 1; i >= 1; i--) /* this push everything back to stack */
+    {                                  /* except the first one */
+        if (data[i] == 0x00)
+        {
+            continue;
+        }
+
+        pushc(data[i]);
+    }
+}
+
+const char *read_op()
+{
+    bool single_operator = true;
+    char op = nextc();
+    struct buffer *buffer = buffer_create();
+    buffer_write(buffer, op);
+
+    if (!op_treated_as_one(op))     /* ++ as input, first parse +        */
+    {                               /* false, means it can be stacked    */
+        op = peekc();               /* peak got the 2nd +                */
+        if (is_single_operator(op)) /* true                              */
+        {                           /* write the 2nd + to buffer         */
+            buffer_write(buffer, op);
+            nextc();
+            single_operator = false;
+        }
+    }
+
+    // NULL Terminator
+    buffer_write(buffer, 0x00);
+    char *ptr = buffer_ptr(buffer);
+    if (!single_operator)
+    {
+        if (!op_valid(ptr))
+        {
+            read_op_flush_back_keep_first(buffer);
+            ptr[1] = 0x00; // ptr[0] is the kept first one, append null terminator
+        }
+    }
+    else if (!op_valid(ptr))
+    {
+        compiler_error(lex_process->compiler, "The operator %s is not valid\n", ptr);
+    }
+
+    return ptr;
+}
+
+static void lex_new_expression()
+{
+    lex_process->current_expression_count ++;
+    if (lex_process->current_expression_count == 1)
+    {
+        lex_process->parentheses_buffer = buffer_create();
+    }
+}
+
+bool lex_is_in_expression()
+{
+    return lex_process->current_expression_count > 0;
+}
+
+static struct token *token_make_operator_or_string()
+{
+    char op = peekc();
+    if (op == '<')
+    {
+        struct token* last_token = lexer_last_token();
+        if (token_is_keyword(last_token, "include"))
+        {
+            return token_make_string('<', '>');
+        }
+    }
+
+    struct token* token = token_create(&(struct token){.type=TOKEN_TYPE_OPERATOR, .sval=read_op()});
+
+    if (op == '(')
+    {
+        lex_new_expression();
+    }
+    return token;
+}
+
 struct token *read_next_token()
 {
     struct token *token = NULL;
@@ -124,6 +277,10 @@ struct token *read_next_token()
     {
     NUMERIC_CASE:
         token = token_make_number();
+        break;
+
+    OPERATOR_CASE_EXCLUDING_DIVISION:
+        token = token_make_operator_or_string();
         break;
 
     case '"':
