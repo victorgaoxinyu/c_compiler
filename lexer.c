@@ -445,7 +445,55 @@ char lex_get_escaped_char(char c)
     return co;
 }
 
-struct token* token_make_quote()
+void lexer_pop_token()
+{
+    vector_pop(lex_process->token_vec);
+}
+
+bool is_hex_char(char c)
+{
+    c = tolower(c);
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+}
+
+const char *read_hex_number_str()
+{
+    struct buffer *buffer = buffer_create();
+    char c = peekc();
+    LEX_GETC_IF(buffer, c, is_hex_char(c));
+    // Null terminator
+    buffer_write(buffer, 0x00);
+    return buffer_ptr(buffer);
+}
+
+struct token *token_make_special_number_hexadecimal()
+{
+    // skip the 'x'
+    nextc();
+
+    unsigned long number = 0;
+    const char *number_str = read_hex_number_str();
+    number = strtol(number_str, 0, 16);
+    return token_make_number_for_value(number);
+}
+
+struct token *token_make_special_number()
+{
+    struct token *token = NULL;
+    struct token *last_token = lexer_last_token(); // pop off '0'
+
+    lexer_pop_token();
+
+    char c = peekc();
+    if (c == 'x')
+    {
+        token = token_make_special_number_hexadecimal();
+    }
+
+    return token;
+}
+
+struct token *token_make_quote()
 {
     assert_next_char('\'');
     char c = nextc();
@@ -456,12 +504,12 @@ struct token* token_make_quote()
         c = lex_get_escaped_char(c);
     }
 
-    if (nextc() != '\'')  // escape quote
+    if (nextc() != '\'') // escape quote
     {
         compiler_error(lex_process->compiler, "You opened a quote ' but did not close if with a ' character");
     }
 
-    return token_create(&(struct token){.type=TOKEN_TYPE_NUMBER, .cval=c});
+    return token_create(&(struct token){.type = TOKEN_TYPE_NUMBER, .cval = c});
 }
 
 struct token *read_next_token()
@@ -487,6 +535,9 @@ struct token *read_next_token()
 
     SYMBOL_CASE:
         token = token_make_symbol();
+        break;
+    case 'x':                                /* we have already tokenized `0` at */
+        token = token_make_special_number(); /* this point, so we use case `x`   */
         break;
 
     case '"':
