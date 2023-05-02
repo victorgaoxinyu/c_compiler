@@ -1,6 +1,7 @@
 #include "compiler.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include "helpers/vector.h"
 
 struct lex_process_functions compiler_lex_functions = {
     .next_char = compile_process_next_char,
@@ -47,6 +48,7 @@ int compile_file(const char *filename, const char *output_filename, int flags)
         return COMPILER_FAILED_WITH_ERRORS;
     }
 
+    process->token_vec = lex_process->token_vec;
     // Perform parsing
 
     // Perform code generation
