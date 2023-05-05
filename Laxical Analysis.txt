@@ -33,5 +33,50 @@ Token types in our Compiler
 ### Creating a number token
 - Need to revisit this section once fixed gdb bug
 
+#### Some gdb commands
+
+```c
+print *(struct token*)vector_at(lex_process->token_vec, )
+// vector count
+print vector_count(process->token_vec)
+// set the peek pointer to the start
+print vector_set_peek_pointer(process->token_vec, )
+```
+
+
+
+# Parsing
+
+take token -> abstract syntax tree
+
+easier to iterate through a tree
+
+```
+int main()
+{
+	int x = 50;
+}
+
+// tree
+function_node: main
+|--body_node: body
+|  |--variable_node: x
+|      |--number_node: 50
+|--vector_arguments
+```
+
+Why are parsers important
+
+- provide structure for an input file
+- nodes can branch off from each other providing stability in logic
+- makes it easier to validate the code
+- easier to compile the input file
+
+
+
+
+
+
+
 
 

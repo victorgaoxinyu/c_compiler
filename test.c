@@ -1,1 +1,2 @@
-"hello" 123 34 "test"
+int x = 123L;
+int y = 123f;
