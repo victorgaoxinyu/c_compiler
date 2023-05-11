@@ -47,7 +47,7 @@ print vector_set_peek_pointer(process->token_vec, )
 
 # Parsing
 
-take token -> abstract syntax tree
+take token -> abstract syntax tree 
 
 easier to iterate through a tree
 
@@ -71,6 +71,16 @@ Why are parsers important
 - nodes can branch off from each other providing stability in logic
 - makes it easier to validate the code
 - easier to compile the input file
+
+#### Some gdb commands
+
+```shell
+print **(struct node**)(vector_back(process->node_vec))
+```
+
+
+
+**need revise p28**
 
 
 
