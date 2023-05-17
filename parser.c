@@ -3,7 +3,7 @@
 
 static struct compile_process *current_process;
 static struct token *parser_last_token;
-
+extern struct expressionable_op_precedence_group op_precedence[TOTAL_OPERATOR_GROUPS];
 struct history
 {
     int flags;
@@ -81,6 +81,69 @@ void parse_expressionable_for_op(struct history* history, const char* op)
     parse_expressionable(history);
 }
 
+static int parser_get_precedence_for_operator(const char* op, struct expressionable_op_precedence_group** group_out)
+{
+    *group_out = NULL;
+    for (int i = 0; i < TOTAL_OPERATOR_GROUPS; i++)
+    {
+        for (int b = 0; op_precedence[i].operators[b]; b++)  // iterate through all operators in the same group
+        {
+            const char* _op = op_precedence[i].operators[b];
+            if (S_EQ(op, _op))
+            {
+                *group_out = &op_precedence;
+                return i;  // this is the precedence
+            }
+        }
+    }
+
+    return -1; // cannot find the operator
+}
+
+static bool parser_left_op_has_priority(const char* op_left, const char* op_right)
+{
+    struct expressionable_op_precedence_group* group_left = NULL;
+    struct expressionable_op_precedence_group* group_right = NULL;
+
+    if (S_EQ(op_left, op_right))
+    {
+        return false;
+    }
+
+    int precedence_left = parser_get_precedence_for_operator(op_left, &group_left);
+    int precedence_right = parser_get_precedence_for_operator(op_right, &group_right);
+    if (group_left->associtivity == ASSOCIATIVITY_RIGHT_TO_LEFT)
+    {
+        return false;
+    }
+
+    return precedence_left <= precedence_right;
+}
+
+void parser_reorder_expression(struct node** node_out)
+{
+    struct node* node = *node_out;
+    if (node->type != NODE_TYPE_EXPRESSION)
+    {
+        return;
+    }
+
+    // No expressions, nothing to do
+    if (node->exp.left->type != NODE_TYPE_EXPRESSION &&
+        node->exp.right && node->exp.right->type != NODE_TYPE_EXPRESSION)
+    {
+        return;
+    }
+
+    // 50 + E(50+20), left node is 50, right node is 50 + 20 which contains an expression
+    if (node->exp.left->type != NODE_TYPE_EXPRESSION &&
+        node->exp.right && node->exp.right->type == NODE_TYPE_EXPRESSION)
+
+    {
+        const char* op = node->exp.right->exp.op;
+    }
+
+}
 
 
 void parse_exp_normal(struct history* history)
@@ -109,7 +172,7 @@ void parse_exp_normal(struct history* history)
     struct node* exp_node = node_pop();
 
     // Reorder the expression
-
+    parser_reorder_expression(&exp_node);
     node_push(exp_node);
 }
 
