@@ -1,5 +1,6 @@
 #include "compiler.h"
 #include "helpers/vector.h"
+#include <assert.h>
 
 static struct compile_process *current_process;
 static struct token *parser_last_token;
@@ -91,7 +92,7 @@ static int parser_get_precedence_for_operator(const char* op, struct expressiona
             const char* _op = op_precedence[i].operators[b];
             if (S_EQ(op, _op))
             {
-                *group_out = &op_precedence;
+                *group_out = &op_precedence[i];
                 return i;  // this is the precedence
             }
         }
@@ -120,6 +121,37 @@ static bool parser_left_op_has_priority(const char* op_left, const char* op_righ
     return precedence_left <= precedence_right;
 }
 
+void parser_node_shift_children_left(struct node* node)
+{
+    /**         make_exp_node
+     *     A         A        C
+     *    / \       / \      / \
+     *   B  C   => B  D  => A  E 
+     *     / \             / \
+     *    D  E            B  D
+     * 
+     *    *                  +
+     *   / \                / \
+     * 50  +       =>      *  120
+     *    / \             / \
+     *  20 120           50 20 
+     */  
+    assert(node->type == NODE_TYPE_EXPRESSION);
+    assert(node->exp.right->type == NODE_TYPE_EXPRESSION);
+
+    const char* right_op = node->exp.right->exp.op;
+    struct node* new_exp_left_node = node->exp.left;
+    struct node* new_exp_right_node = node->exp.right->exp.left;
+    make_exp_node(new_exp_left_node, new_exp_right_node, node->exp.op);
+
+    struct node* new_left_operand = node_pop();
+    struct node* new_right_operand = node->exp.right->exp.right;
+    node->exp.left = new_left_operand;
+    node->exp.right = new_right_operand;
+    node->exp.op = right_op;
+
+}
+
 void parser_reorder_expression(struct node** node_out)
 {
     struct node* node = *node_out;
@@ -135,12 +167,20 @@ void parser_reorder_expression(struct node** node_out)
         return;
     }
 
-    // 50 + E(50+20), left node is 50, right node is 50 + 20 which contains an expression
+    // 50 + E(50*20), left node is 50, right node is 50 * 20 which contains an expression
     if (node->exp.left->type != NODE_TYPE_EXPRESSION &&
         node->exp.right && node->exp.right->type == NODE_TYPE_EXPRESSION)
-
     {
-        const char* op = node->exp.right->exp.op;
+        const char* right_op = node->exp.right->exp.op;
+        if (parser_left_op_has_priority(node->exp.op, right_op))
+        {
+            // 50*E(20+120)
+            // E(50*20)+120
+            parser_node_shift_children_left(node);
+
+            parser_reorder_expression(&node->exp.left);
+            parser_reorder_expression(&node->exp.right);
+        }
     }
 
 }

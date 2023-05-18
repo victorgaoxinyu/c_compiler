@@ -75,7 +75,9 @@ Why are parsers important
 #### Some gdb commands
 
 ```shell
-print **(struct node**)(vector_back(process->node_vec))
+print **(struct node**)(vector_back(process->node_vec))\
+print *node_peek()
+print *node_peek()->exp.left
 ```
 
 
