@@ -226,7 +226,7 @@ int parse_exp(struct history *history)
 
 void parse_identifier(struct history *history)
 {
-    assert(token_peek_next()->type == NODE_TYPE_IDENTIFIER);
+    assert(token_peek_next()->type == TOKEN_TYPE_IDENTIFIER);
     parse_single_token_to_node();
 }
 
@@ -243,7 +243,7 @@ static bool is_keyword_variable_modifier(const char *val)
 void parse_datatype_modifiers(struct datatype *dtype)
 {
     struct token *token = token_peek_next();
-    while (token && token->type == TOKEN_TYPE_IDENTIFIER)
+    while (token && token->type == TOKEN_TYPE_KEYWORD)
     {
         if (!is_keyword_variable_modifier(token->sval))
         {
@@ -503,7 +503,7 @@ void parse_datatype(struct datatype *dtype)
 
     parse_datatype_modifiers(dtype);
     parse_datatype_type(dtype);
-        (dtype); // can have modifier after the datatype
+    parse_datatype_modifiers(dtype); // can have modifier after the datatype
 }
 
 void parse_variable_function_or_struct_union(struct history *history)
@@ -549,6 +549,11 @@ int parse_expressionable_single(struct history *history)
         res = 0;
         break;
 
+    case TOKEN_TYPE_KEYWORD:
+        parse_keyword(history);
+        res = 0;
+        break;
+
     default:
         break;
     }
@@ -559,6 +564,12 @@ void parse_expressionable(struct history *history)
     while (parse_expressionable_single(history) == 0)
     {
     }
+}
+
+void parse_keyword_for_global()
+{
+    parse_keyword(history_begin(0));
+    struct node* node = node_pop();
 }
 
 int parse_next()
@@ -576,10 +587,10 @@ int parse_next()
     case TOKEN_TYPE_IDENTIFIER:
     case TOKEN_TYPE_STRING:
         parse_expressionable(history_begin(0));
-        // parse_single_token_to_node();
         break;
 
-    default:
+    case TOKEN_TYPE_KEYWORD:
+        parse_keyword_for_global();
         break;
     }
     return 0;

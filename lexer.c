@@ -315,7 +315,7 @@ bool is_keyword(const char *str)
            S_EQ(str, "signed") ||
            S_EQ(str, "char") ||
            S_EQ(str, "short") ||
-           S_EQ(str, "init") ||
+           S_EQ(str, "int") ||
            S_EQ(str, "long") ||
            S_EQ(str, "float") ||
            S_EQ(str, "double") ||
