@@ -6,3 +6,5 @@ how to choose when to do operation on the pointer, when to return value
 double pointer?
 
 when to use ., when to use ->
+
+melloc and calloc?

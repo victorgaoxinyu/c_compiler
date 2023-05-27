@@ -19,7 +19,6 @@ bool lex_is_in_expression();
 static struct lex_process *lex_process; // not sure what's this for
 static struct token tmp_token;
 
-
 static char peekc()
 {
     return lex_process->function->peek_char(lex_process);
@@ -29,9 +28,9 @@ static char nextc()
 {
     char c = lex_process->function->next_char(lex_process);
 
-    if (lex_is_in_expression())  // inside of bracket like (10+20)
+    if (lex_is_in_expression()) // inside of bracket like (10+20)
     {
-        buffer_write(lex_process->parentheses_buffer, c);  // token 10, +, 20 all share a pointer to parentheses buffer
+        buffer_write(lex_process->parentheses_buffer, c); // token 10, +, 20 all share a pointer to parentheses buffer
     }
     lex_process->pos.col += 1;
     if (c == '\n')
@@ -128,7 +127,7 @@ struct token *token_make_number_for_value(unsigned long number)
         nextc();
     }
 
-    return token_create(&(struct token){.type = TOKEN_TYPE_NUMBER, .llnum = number, .num.type=number_type});
+    return token_create(&(struct token){.type = TOKEN_TYPE_NUMBER, .llnum = number, .num.type = number_type});
 }
 
 struct token *token_make_number()
@@ -295,6 +294,19 @@ static void lex_new_expression()
 bool lex_is_in_expression()
 {
     return lex_process->current_expression_count > 0;
+}
+
+bool keyword_is_datatype(const char *str)
+{
+    return S_EQ(str, "void") ||
+           S_EQ(str, "char") ||
+           S_EQ(str, "int") ||
+           S_EQ(str, "short") ||
+           S_EQ(str, "float") ||
+           S_EQ(str, "double") ||
+           S_EQ(str, "long") ||
+           S_EQ(str, "struct") ||
+           S_EQ(str, "union");
 }
 
 bool is_keyword(const char *str)
@@ -510,10 +522,10 @@ struct token *token_make_special_number_hexadecimal()
     return token_make_number_for_value(number);
 }
 
-void  lexer_validate_binary_string(const char* str)
+void lexer_validate_binary_string(const char *str)
 {
     size_t len = strlen(str);
-    for (int i = 0; i < len; i ++)
+    for (int i = 0; i < len; i++)
     {
         if (str[i] != '0' && str[i] != '1')
         {
@@ -522,7 +534,7 @@ void  lexer_validate_binary_string(const char* str)
     }
 }
 
-struct token* token_make_special_number_binary()
+struct token *token_make_special_number_binary()
 {
     // skip the 'b'
     nextc();
@@ -541,7 +553,7 @@ struct token *token_make_special_number()
 
     if (!last_token || !(last_token->type == TOKEN_TYPE_NUMBER && last_token->llnum == 0))
     {
-        return token_make_identifier_or_keyword();  // x500, or b123
+        return token_make_identifier_or_keyword(); // x500, or b123
     }
 
     lexer_pop_token();
@@ -658,35 +670,36 @@ int lex(struct lex_process *process)
     return LEXICAL_ANALYSIS_ALL_OK;
 };
 
-char lexer_string_buffer_next_char(struct lex_process* process)
+char lexer_string_buffer_next_char(struct lex_process *process)
 {
-    struct buffer* buf = lex_process_private(process);
+    struct buffer *buf = lex_process_private(process);
     return buffer_read(buf);
 }
 
-char lexer_string_buffer_peek_char(struct lex_process* process)
+char lexer_string_buffer_peek_char(struct lex_process *process)
 {
-    struct buffer* buf = lex_process_private(process);
+    struct buffer *buf = lex_process_private(process);
     return buffer_peek(buf);
 }
 
-void lexer_string_buffer_push_char(struct lex_process* process, char c)
+void lexer_string_buffer_push_char(struct lex_process *process, char c)
 {
-    struct buffer* buf = lex_process_private(process);
+    struct buffer *buf = lex_process_private(process);
     buffer_write(buf, c);
 }
 
-struct lex_process_functions lexer_string_buffer_functions = {  // next char, peek char, push char
+struct lex_process_functions lexer_string_buffer_functions = {
+    // next char, peek char, push char
     .next_char = lexer_string_buffer_next_char,
     .peek_char = lexer_string_buffer_peek_char,
     .push_char = lexer_string_buffer_push_char,
 };
 
-struct lex_process *tokens_build_for_string(struct compile_process* compiler, const char* str)
+struct lex_process *tokens_build_for_string(struct compile_process *compiler, const char *str)
 {
-    struct buffer* buffer = buffer_create();
+    struct buffer *buffer = buffer_create();
     buffer_printf(buffer, str);
-    struct lex_process* lex_process = lex_process_create(compiler, &lexer_string_buffer_functions, buffer);
+    struct lex_process *lex_process = lex_process_create(compiler, &lexer_string_buffer_functions, buffer);
 
     if (!lex_process)
     {
