@@ -78,11 +78,35 @@ Why are parsers important
 print **(struct node**)(vector_back(process->node_vec))\
 print *node_peek()
 print *node_peek()->exp.left
+
+step // step into the function
 ```
 
 
 
 **need revise p28**
+
+# Scope
+
+Scope example
+
+```c
+int d;                    // Global Scope - Variable d
+int main(int z)           // Function arguments scope - Variable Z
+{
+	int a;                // Function body scope - Variable A, B
+	int b
+}
+```
+
+
+
+Structure scopes
+
+- struct bodies will have their own scopes that will have no parents
+- resolver will deal with it
+
+
 
 
 

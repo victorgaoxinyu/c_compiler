@@ -145,6 +145,20 @@ enum
     COMPILER_FAILED_WITH_ERRORS,
 };
 
+struct scope
+{
+    int flags;
+
+    // void*
+    struct vector* entities;
+
+    // The total number of bytes this scope uses. Algned to 16 bytes.
+    size_t size;
+
+    // NULL if no parent.
+    struct scope* parent;
+};
+
 struct compile_process
 {
     int flags;
@@ -162,6 +176,13 @@ struct compile_process
     struct vector* node_vec;
     struct vector* node_tree_vec;
     FILE *ofile;
+
+    struct
+    {
+        struct scope* root;
+        struct scope* current;
+    } scope;
+    
 };
 
 enum
