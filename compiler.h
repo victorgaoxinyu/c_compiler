@@ -159,6 +159,20 @@ struct scope
     struct scope* parent;
 };
 
+enum
+{
+    SYMBOL_TYPE_NODE,
+    SYMBOL_TYPE_NATIVE_FUNCTION,
+    SYMBOL_TYPE_UNKNOWN
+};
+
+struct symbol
+{
+    const char* name;
+    int type;
+    void* data;
+};
+
 struct compile_process
 {
     int flags;
@@ -182,6 +196,15 @@ struct compile_process
         struct scope* root;
         struct scope* current;
     } scope;
+
+    struct
+    {
+        // Current active symbol table, this vector holds struct symbol*
+        struct vector* table;
+        
+        // this vector holds struct vector* above^
+        struct vector* tables;
+    } symbols;
     
 };
 

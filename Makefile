@@ -1,7 +1,7 @@
 OBJECTS= ./build/compiler.o ./build/cprocess.o ./build/helpers/buffer.o \
 		 ./build/helpers/vector.o ./build/lexer.o ./build/token.o \
 		 ./build/lex_process.o ./build/parser.o ./build/node.o \
-		 ./build/scope.o \
+		 ./build/scope.o ./build/symresolver.o \
 		 ./build/expressionable.o ./build/datatype.o
 INCLUDES= -I ./
 
@@ -35,6 +35,9 @@ all: ${OBJECTS}
 
 ./build/scope.o: ./scope.c
 	gcc ./scope.c ${INCLUDES} -o ./build/scope.o -g -c
+
+./build/symresolver.o: ./symresolver.c
+	gcc ./symresolver.c ${INCLUDES} -o ./build/symresolver.o -g -c
 
 ./build/datatype.o: ./datatype.c
 	gcc ./datatype.c ${INCLUDES} -o ./build/datatype.o -g -c
