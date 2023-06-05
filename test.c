@@ -1,1 +1,1 @@
-unsigned int
+int x, y, z = 50;

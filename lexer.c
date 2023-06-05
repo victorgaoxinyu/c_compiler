@@ -214,6 +214,7 @@ bool op_valid(const char *op) // string
            S_EQ(op, "->") ||
            S_EQ(op, "(") ||
            S_EQ(op, "[") ||
+           S_EQ(op, ",") ||
            S_EQ(op, ".") ||
            S_EQ(op, "...") ||
            S_EQ(op, "~") ||
