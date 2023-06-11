@@ -106,7 +106,36 @@ Structure scopes
 - struct bodies will have their own scopes that will have no parents
 - resolver will deal with it
 
+# Symbols
 
+- functions we have identified during the compile process
+- structures we have identified during the compile process
+- global variables
+
+
+
+Rules
+
+- should never share the same name
+
+
+
+### Some GDB commands
+
+```c
+print vector_count(node->var.type->array->brackets->n_brackets)
+
+```
+
+
+
+## Calculating Array Sizes
+
+```c
+int x[50]; // sizeof(int) * 50 -> 4 * 50
+int y[30][20]; // sizeof(int) * 30 * 20 -> 4 * 30 * 20
+char e[40][10][20]; // sizeof(char) * 40 * 10 * 20 -> 1 * 40 * 10 * 20 
+```
 
 
 
