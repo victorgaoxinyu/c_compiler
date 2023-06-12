@@ -8,3 +8,7 @@ double pointer?
 when to use ., when to use ->
 
 melloc and calloc?
+
+node stack? 
+
+What is a stack?
