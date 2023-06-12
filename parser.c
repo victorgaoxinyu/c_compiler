@@ -775,7 +775,7 @@ void parse_struct_or_union(struct datatype* dtype)
     case DATA_TYPE_UNION:
         break;
     default:
-        compiler_error(current_process, "COMPILER BUG: The provided datatype is not a structure or union.")
+        compiler_error(current_process, "COMPILER BUG: The provided datatype is not a structure or union.");
     }
 }
 

@@ -455,6 +455,11 @@ bool token_is_symbol(struct token *token, char c);
 bool keyword_is_datatype(const char *str);
 bool token_is_primitive_keyword(struct token *token);
 bool datatype_is_struct_or_union_for_name(const char *name);
+size_t datatype_size_for_array_access(struct datatype* dtype);
+size_t datatype_element_size(struct datatype* dtype);
+size_t datatype_size_no_ptr(struct datatype* dtype);
+size_t datatype_size(struct datatype* dtype);
+
 bool token_is_operator(struct token *token, const char *val);
 
 void node_set_vector(struct vector *vec, struct vector *root_vec);
