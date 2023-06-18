@@ -318,6 +318,7 @@ struct node
         struct var
         {
             struct datatype type;
+            int padding;
             const char *name;
             struct node *val;
         } var;
@@ -483,6 +484,28 @@ size_t array_brackets_calculate_size_from_index(struct datatype* dtype, struct a
 size_t array_brackets_calculate_size(struct datatype* dtype, struct array_brackets* brackets);
 int array_total_indexes(struct datatype* dtype);
 bool datatype_is_struct_or_union(struct datatype* dtype);
+
+
+/**
+ * @brief Gets the variable size from the given variable node
+ * 
+ * @param var_node 
+ * @return size_t 
+ */
+size_t variable_size(struct node* var_node);
+/**
+ * @brief Sums the variable size of all variable nodes inside the variable list node
+ * Returns the results
+ * 
+ * @param var_list_node 
+ * @return size_t 
+ */
+size_t variable_size_for_list(struct node* var_list_node);
+
+int padding(int val, int to); 
+int align_value(int val, int to); 
+int align_value_treat_positive(int val, int to); 
+int compute_sum_padding(struct vector* vec); 
 
 struct scope *scope_new(struct compile_process *process, int flags);
 struct scope *scope_create_root(struct compile_process *process);
