@@ -139,9 +139,70 @@ char e[40][10][20]; // sizeof(char) * 40 * 10 * 20 -> 1 * 40 * 10 * 20
 
 
 
+## Padding and Alignment
+
+CPU I/O operations for 32 bit systems
+
+- push pop instructions use 4 bytes at a time
+- Memory access is preformed on boundaries of 4 bytes.
 
 
 
+How to solve the problem of loading two words?
+
+- align our data so it fits into a 4 byte boundary.
+- Pad NULL bytes at the end of an unaligned variable forcing it to be aligned.
+
+ 
+
+Unaligned structure example
+
+```c
+struct dog
+{
+	int x;
+	char e;
+	char d;
+	int dd;
+} __attribute__((packed));
+
+/**
+* Memory address
+* variable x: 0-3
+* variable e: 4
+* variable d: 5
+* variable dd: 6-9
+*/
+```
+
+Aligned structure example
+
+```c
+// Same struct as above
+
+/**
+* Memory address
+* variable x: 0-3
+* variable dd: 4 -7
+* variable e: 8
+* variable d: 9
+*/
+```
+
+Padding example
+
+```c
+struct dog
+{
+	int x;
+	char e;
+	char d;
+	char pad[2]; // compiler added this
+    int dd;
+}
+
+sizeof(struct dog) = 8 bytes
+```
 
 
 
