@@ -206,3 +206,153 @@ sizeof(struct dog) = 8 bytes
 
 
 
+## Scope offsets
+
+- Scope offsets are offsets relative to the EBP(Base Pointer) or ESP(Stack Pointer)
+- Scope offsets can offset upwards and downwards
+- Accessing local variables causes us to access an offset in the negative region
+- Accessing function arguments causes us to access an offset in a positive region
+
+#### Function argument scope access
+
+```assembly
+int test(int x, int y)
+{
+	x = 50;
+	y = 20;
+}
+
+// 
+test:
+	push ebp
+	move ebp, esp
+	move DWORD PTR [ebp+8], 50
+	move DWORD PTR [ebp+12], 20
+	nop
+	pop ebp
+	ret
+
+/* call function */
+test(50, 30)
+
+main:
+	push ebp
+	move ebp,
+	push 30   /* push backward to the stack, first 30, then 50 */
+	push 50
+	call test
+	add esp, 8
+	move eax, 0
+	leave
+	ret
+	
+```
+
+#### Local variable scope access
+
+````assembly
+int test(int x, int y)
+{
+	int d = 20;
+	int e = 30;
+}
+
+test:
+	push ebp
+	mov ebp, esp
+	sub esp, 16                /* make room for variable, and align to 16 byte*/
+	mov DWORD PTR [ebp-4], 20  
+	mov DWORD PTR [ebp-8], 30
+	nop
+	leave
+	ret
+
+/*
+Stack Frame
+	0x1000 - Return Address
+	0x0FFC - Old EBP
+	EBP = ESP(0x0FFC)
+	0x0FF8 - 0x0FFB (d > ebp - 4) (4 bytes)  first decrement, and then write increamently
+	0x0FF4 - 0x0FF7 (e > ebp - 8) (4 bytes)
+*/
+
+````
+
+#### Structure global variable access
+
+````assembly
+struct dog
+{
+	int a;
+	char b;
+	char c;
+};
+
+struct dog d;  /* struct is not within the scope, but gloabl */
+int main()
+{
+	d.a = 50;
+	d.b = 30;
+	d.c = 60;
+}
+
+/* assembly */
+d:
+	.zero 8
+main:
+	push ebp
+	mov ebp, esp
+	mov DWORD PTR d, 50
+	mov BYTE PTR d+4, 30
+	mov BYTE PTR d+5, 60
+	mov eax, 0
+	pop ebp
+	ret
+
+````
+
+#### Structure Scope variable access
+
+```assembly
+int main()
+{
+	struct dog d;
+	d.a = 50;
+	d.b = 30;
+	d.c = 60;
+}
+
+/* assembly */
+main:
+	push ebp
+	mov ebp, esp
+	sub esp, 16
+	mov DWORD PTR [ebp-8], 50
+	mov BYTE PTR [ebp-4], 30
+	mov BYTE PTR [ebp-3], 60
+	mov eax, 0
+	leave
+	ret
+
+/* Calculate structure offset for local scope */
+struct dog
+{
+	int a;  // dog+0
+	char b; // dog+4
+	char c; // dog +5
+}
+
+/*
+Take size of dog structure
+sizeof(struct dog) = 8
+Variable "a" = 0-8 = EBP-8
+Variable "b" = 4-8 = EBP-4
+Variable "c" = 5-8 = EBP-3
+*/
+
+```
+
+
+
+
+

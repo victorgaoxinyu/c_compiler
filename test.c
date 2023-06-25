@@ -1,1 +1,4 @@
-int x, y, z = 50;
+struct test
+{
+
+};
