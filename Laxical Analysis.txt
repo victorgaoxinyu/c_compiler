@@ -351,8 +351,26 @@ Variable "c" = 5-8 = EBP-3
 */
 
 ```
+## Functions
 
+have:
+- arguments
+- scopes
+- names and it is unique
+  - in C, we cannot overload, but can in CPP
+- can return data
 
+attr of function structure
+- flags
+  - special flags
+    - function_node_flag_is_native:
+      - means that the given function only exist in compiler, like a macro
+- return datatype
+- function arguments
+  - var node stored in a vector
+- function body
+- stack size
 
-
+**Re-Check**
+- check 72, why add DATA_SIZE_DWORD to func.args.stack_addition
 

@@ -1,4 +1,2 @@
-struct test
-{
 
-};
+int x = 4;
