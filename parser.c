@@ -1109,6 +1109,7 @@ void parse_keyword_for_global()
     parse_keyword(history_begin(0));
     struct node *node = node_pop();
 
+    #warning "missing things?"
     node_push(node); 
 }
 

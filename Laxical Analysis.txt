@@ -347,7 +347,7 @@ Take size of dog structure
 sizeof(struct dog) = 8
 Variable "a" = 0-8 = EBP-8
 Variable "b" = 4-8 = EBP-4
-Variable "c" = 5-8 = EBP-3
+Variable "c" = 5-8 = EBP-3 
 */
 
 ```
