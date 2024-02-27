@@ -12,3 +12,5 @@ melloc and calloc?
 node stack? 
 
 What is a stack?
+
+Functional arguments, going upward the stack, while accessing the local variables, go downward ths stack

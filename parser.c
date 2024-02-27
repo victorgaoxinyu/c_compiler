@@ -1000,6 +1000,29 @@ void parse_struct_or_union(struct datatype* dtype)
     }
 }
 
+void token_read_dots(size_t amount)
+{
+    for (size_t i = 0; amount; i++)
+    {
+        expect_op(".");
+    }
+}
+
+
+
+struct vector* parse_function_arguments(struct history* history)
+{
+    parser_scope_new();
+    struct vector* arguments_vec = vector_create(sizeof(struct node*));
+    while(!token_next_is_symbol(')'))
+    {
+        if (token_next_is_operator("."))
+        {
+            token_read_dots(3);  // Handle ... variadic function
+        }
+    }
+}
+
 void parse_variable_function_or_struct_union(struct history *history)
 {
     struct datatype dtype;
